@@ -8,12 +8,15 @@ const originalMazeDimensions = {x: 1024, y: 820};
 const updatedMazeDimensions  = {x: 1580, y: 1264};
 const scaleFactor            = updatedMazeDimensions.x / originalMazeDimensions.x;
 
-const pathThickness     = 6;
+const pathThickness     = 5;
 const pointerRadius     = 80 * scaleFactor;
 const mousePosRadius    = 5;
-const mouseKeyPosRadius = mousePosRadius * 3;
+const mouseKeyPosRadius = mousePosRadius * 2;
 const startPointColor   = "#00FF00";
 const endPointColor     = "#FF0000";
+const defaultPathColor  = "#000000";
+const fogPathColor      = "#FFFFFF";
+
 
 function App() {
   const [participantList, setParticipantList] = useState([]);
@@ -25,6 +28,7 @@ function App() {
     Score:     "",
     Timestamp: "",
     mazePath:  "",
+    nudge:     "",
   });
 
   const [mousePositions, setMousePositions]     = useState([]);
@@ -41,10 +45,12 @@ function App() {
     },
   });
 
-  const [drawPoints,    setDrawPoints]    = useState(false);
-  const [drawKeyPoints, setDrawKeyPoints] = useState(false);
-  const [drawVecSpeed,  setDrawVecSpeed]  = useState(false);
-  const [sliderValue,   setSliderValue]   = useState(0);
+  const [drawPath,       setDrawPath]       = useState(true);
+  const [drawPoints,     setDrawPoints]     = useState(false);
+  const [drawKeyPoints,  setDrawKeyPoints]  = useState(false);
+  const [drawVecSpeed,   setDrawVecSpeed]   = useState(false);
+  const [drawFogOverlay, setDrawFogOverlay] = useState(false);
+  const [sliderValue,   setSliderValue]     = useState(0);
 
   const [vecSpeeds, setVecSpeeds] = useState({
     min: -1,
@@ -78,6 +84,7 @@ function App() {
             Score:     "",
             Timestamp: "",
             mazePath:  "",
+            nudge:     "",
           });
         })
         .catch((error) => {
@@ -127,37 +134,82 @@ function App() {
         draw();
       }
     }
-  }, [currentMouseData, drawPoints, drawVecSpeed, drawKeyPoints]);
+  }, [currentMouseData, drawPoints, drawVecSpeed, drawKeyPoints, drawFogOverlay, drawPath]);
 
   const draw = () => {
     context = canvas.getContext("2d");
-
     context.clearRect(0, 0, updatedMazeDimensions.x, updatedMazeDimensions.y);
 
-    drawPath();
+    drawFog();
+    drawMousePath();
     drawMousePoints();
     drawKeyMousePoints()
   }
 
-  const drawPath = () => {
-    for (let index = 0; index < mousePositions.length; index++) {
-      context.beginPath();
-      context.lineWidth = pathThickness;
+  const drawFog = () => {
+    if (drawFogOverlay) {
+      let fogFill = context.createLinearGradient(0, 0, 0, canvas.height);
+      fogFill.addColorStop(0,   "transparent");
+      fogFill.addColorStop(.05, "rgba(0, 0, 0, 0.5)");
+      fogFill.addColorStop(.07, "rgba(0, 0, 0, 0.8)");
+      fogFill.addColorStop(.1,  "rgba(0, 0, 0, 1)");
 
-      if(index === 0) {
-        context.moveTo(mousePositions[index].Mouse_X * scaleFactor, mousePositions[index].Mouse_Y * scaleFactor);
-      } else {
-        context.moveTo(mousePositions[index-1].Mouse_X * scaleFactor, mousePositions[index-1].Mouse_Y * scaleFactor);
 
-        if(index <= currentMouseData.index) {
-          if(drawVecSpeed) {
-            context.strokeStyle = HSLtoRGB(vectorProps[index-1].color);
-          } else {
-            context.strokeStyle = "#000000";
+      let radGrad = context.createRadialGradient(
+        currentMouseData.position.x * scaleFactor,
+        currentMouseData.position.y * scaleFactor,
+        20 * scaleFactor,
+        currentMouseData.position.x * scaleFactor,
+        currentMouseData.position.y * scaleFactor,
+        80 * scaleFactor
+      );
+      radGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+      radGrad.addColorStop(0, "rgba(255, 255, 255, 1)");
+
+      context.globalCompositeOperation = "source-over";
+
+      context.fillStyle = fogFill;
+      context.fillRect(0, 0, updatedMazeDimensions.x, updatedMazeDimensions.y * 0.85);
+      
+      context.globalCompositeOperation = "xor";
+
+      context.fillStyle = radGrad;
+      context.fillRect(
+        (currentMouseData.position.x - 80) * scaleFactor,
+        (currentMouseData.position.y - 80) * scaleFactor,
+        80 * scaleFactor * 2,
+        80 * scaleFactor * 2
+      );
+
+      context.globalCompositeOperation = "source-over";
+    }
+  }
+
+  const drawMousePath = () => {
+    if (drawPath) {
+      for (let index = 0; index < mousePositions.length; index++) {
+        context.beginPath();
+        context.lineWidth = pathThickness;
+
+        if(index === 0) {
+          context.moveTo(mousePositions[index].Mouse_X * scaleFactor, mousePositions[index].Mouse_Y * scaleFactor);
+        } else {
+          context.moveTo(mousePositions[index-1].Mouse_X * scaleFactor, mousePositions[index-1].Mouse_Y * scaleFactor);
+
+          if(index <= currentMouseData.index) {
+            if(drawVecSpeed) {
+              context.strokeStyle = HSLtoRGB(vectorProps[index-1].color);
+            } else {
+              if (drawFogOverlay) {
+                context.strokeStyle = fogPathColor;
+              } else {
+                context.strokeStyle = defaultPathColor;
+              }
+            }
+
+            context.lineTo(mousePositions[index].Mouse_X * scaleFactor, mousePositions[index].Mouse_Y * scaleFactor);
+            context.stroke();
           }
-
-          context.lineTo(mousePositions[index].Mouse_X * scaleFactor, mousePositions[index].Mouse_Y * scaleFactor);
-          context.stroke();
         }
       }
     }
@@ -167,7 +219,13 @@ function App() {
     if (drawPoints) {
       for (let index = 0; index <= currentMouseData.index; index++) {
         context.beginPath();
-        context.fillStyle = "#000000";
+
+        if (drawFogOverlay) {
+          context.fillStyle = fogPathColor;
+        } else {
+          context.fillStyle = defaultPathColor;
+        }
+
         context.arc(mousePositions[index].Mouse_X * scaleFactor, mousePositions[index].Mouse_Y * scaleFactor, mousePosRadius, 0, 2 * Math.PI, false);
         context.fill();
       }
@@ -198,13 +256,14 @@ function App() {
   const handleLevelChange = (event) => {
     const levelListEntry = levels[event.target.value-1];
     axios
-      .get("http://localhost:3001/getMazePath/" + levelListEntry.Level)
+      .get("http://localhost:3001/getLevelData/" + levelListEntry.Level)
       .then((response) => {
         setCurrentLevel({
           Level:     levelListEntry.Level,
           Score:     levelListEntry.Score,
           Timestamp: levelListEntry.Timestamp,
           mazePath:  response.data.mazePath,
+          nudge:     response.data.nudge,
         });
       })
       .catch((error) => {
@@ -233,10 +292,26 @@ function App() {
 
   const handleColorVecChange = (event) => {
     setDrawVecSpeed(event.target.checked);
+
+    if (event.target.checked) {
+      setDrawPath(true);
+    }
   }
 
   const handleKeyPositionChange = (event) =>  {
     setDrawKeyPoints(event.target.checked);
+  }
+
+  const handleFogChange = (event) => {
+    setDrawFogOverlay(event.target.checked);
+  }
+
+  const handlePathChange = (event) => {
+    setDrawPath(event.target.checked);
+
+    if (!event.target.checked) {
+      setDrawVecSpeed(false);
+    }
   }
 
   const generateDates = (timestamp) => {
@@ -308,7 +383,6 @@ function App() {
 
     return vec_props;
   }
-
   
   const HSLtoRGB = (hslColor) =>  {
     let h = hslColor.h;
@@ -380,15 +454,10 @@ function App() {
                   }
                 </Select>
               </FormControl>
-              { currentLevel.Score !== "" ? (
-                <Typography>Score: {currentLevel.Score}</Typography>
-              ) : (
-                <Typography>Score: -</Typography>
-              )}
             </Stack>
             <Stack
               direction="row"
-              alignItems="center"
+              alignItems="top"
               spacing={3}>
                 <Stack>
                   <FormGroup>
@@ -421,7 +490,7 @@ function App() {
                   <Grid container width="300px">
                     <Grid item xs={12}>
                       <FormGroup>
-                        <FormControlLabel control={<Switch onChange={handleColorVecChange} disabled={mousePositions.length === 0 || currentLevel.Level === ""} />} label="Show Vector Speed [px/ms]" /> 
+                        <FormControlLabel control={<Switch onChange={handleColorVecChange} checked={drawVecSpeed} disabled={mousePositions.length === 0 || currentLevel.Level === ""} />} label="Show Vector Speed [px/ms]" /> 
                       </FormGroup>
                     </Grid>
                     <Grid item xs={6} display="flex" justifyContent="flex-start">
@@ -446,6 +515,25 @@ function App() {
                       )}
                     </Grid>      
                   </Grid>
+                </Stack>
+                <Stack>
+                  <FormGroup>
+                    <FormControlLabel control={<Switch onChange={handlePathChange} checked={drawPath} disabled={mousePositions.length === 0 || currentLevel.Level === ""} />} label="Show Path" /> 
+                  </FormGroup>
+                  <FormGroup>
+                    <FormControlLabel control={<Switch onChange={handleFogChange} checked={drawFogOverlay} disabled={mousePositions.length === 0 || currentLevel.Level === ""} />} label="Show Fog" /> 
+                  </FormGroup>
+                  { currentLevel.Score !== "" ? (
+                    <>
+                      <Typography>Score: {currentLevel.Score}</Typography>
+                      <Typography>AI Nudge(s): {currentLevel.nudge.toString()}</Typography> 
+                    </>
+                  ) : (
+                    <>
+                      <Typography>Score: -</Typography>
+                      <Typography>AI Nudge(s): -</Typography>
+                    </>
+                  )}
                 </Stack>
             </Stack>
           </Stack>
@@ -500,12 +588,16 @@ function App() {
                   width="1580" 
                   style={{position: "absolute", left: 0, top: 0}}>
                 </canvas>
-                <Box
-                  sx={{height: `${pointerRadius*2}px`, width: `${pointerRadius*2}px`, position: "absolute",
-                  left: `${currentMouseData.position.x*scaleFactor-pointerRadius}px`, top: `${currentMouseData.position.y*scaleFactor-pointerRadius}px`}}
-                  border="2px solid black"
-                  borderRadius="50%"
-                />
+                { drawFogOverlay ? (
+                  <></>
+                ):(
+                  <Box
+                    sx={{height: `${pointerRadius*2}px`, width: `${pointerRadius*2}px`, position: "absolute",
+                    left: `${currentMouseData.position.x*scaleFactor-pointerRadius}px`, top: `${currentMouseData.position.y*scaleFactor-pointerRadius}px`}}
+                    border="2px solid black"
+                    borderRadius="50%"
+                  />
+                )}
               </>
             ) : (<></>)}
           </Box>

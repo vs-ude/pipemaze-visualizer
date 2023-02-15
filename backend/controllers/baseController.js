@@ -1,10 +1,28 @@
 const fs = require("fs");
 const levelIndeces   = require("../model/levelIndeces");
+const levelNudges    = require("../model/nudges");
 const fileController = require("./fileController");
 
-function getMazePath(req, res, next) {
-    const levelFileName = levelIndeces.indeces[req.params.id - 1];
-    res.status(200).send({mazePath: "http://localhost:3001/levels/" + levelFileName + ".png"});
+function getLevelData(req, res, next) {
+    let path   = getMazePath(req.params.id-1);
+    let nudges = getNudges(req.params.id-1);
+
+    res.status(200).send({
+        mazePath: path,
+        nudge:    nudges, 
+    });
+}
+
+function getMazePath(id) {
+    const levelFileName = levelIndeces.indeces[id];
+    
+    return "http://localhost:3001/levels/" + levelFileName + ".png";
+}
+
+function getNudges(id) {
+    const nudges = levelNudges.nudges[id];
+
+    return nudges;
 }
 
 function getParticipantList(req, res, next) {
@@ -40,4 +58,4 @@ function getLevelMousePositions(req, res, next) {
     res.status(200).send(mouseData);
 }
 
-module.exports = { getMazePath, getParticipantList, getPlayedLevels, getLevelCount, getLevelMousePositions };
+module.exports = { getLevelData, getParticipantList, getPlayedLevels, getLevelCount, getLevelMousePositions };
