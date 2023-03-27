@@ -80,4 +80,4 @@ If you have any questions, suggestions or just want to get in touch, please cont
 * Eileen Becks (eileen.becks@uni-due.de)
 * Malte Josten (malte.josten@uni-due.de)
 
-or visit our chair's website at https://vs-uni-due.de/.
+or visit our chair's website at https://vs.uni-due.de/.
