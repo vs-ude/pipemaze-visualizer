@@ -157,10 +157,10 @@ function App() {
 
       let radGrad = context.createRadialGradient(
         currentMouseData.position.x * scaleFactor,
-        currentMouseData.position.y * scaleFactor,
+        (currentMouseData.position.y + 30) * scaleFactor,
         20 * scaleFactor,
         currentMouseData.position.x * scaleFactor,
-        currentMouseData.position.y * scaleFactor,
+        (currentMouseData.position.y + 30)* scaleFactor,
         80 * scaleFactor
       );
       radGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
@@ -178,7 +178,7 @@ function App() {
         (currentMouseData.position.x - 80) * scaleFactor,
         (currentMouseData.position.y - 80) * scaleFactor,
         80 * scaleFactor * 2,
-        80 * scaleFactor * 2
+        (80 + 30) * scaleFactor * 2
       );
 
       context.globalCompositeOperation = "source-over";
@@ -192,9 +192,9 @@ function App() {
         context.lineWidth = pathThickness;
 
         if(index === 0) {
-          context.moveTo(mousePositions[index].Mouse_X * scaleFactor, mousePositions[index].Mouse_Y * scaleFactor);
+          context.moveTo(mousePositions[index].Mouse_X * scaleFactor, (mousePositions[index].Mouse_Y + 30) * scaleFactor);
         } else {
-          context.moveTo(mousePositions[index-1].Mouse_X * scaleFactor, mousePositions[index-1].Mouse_Y * scaleFactor);
+          context.moveTo(mousePositions[index-1].Mouse_X * scaleFactor, (mousePositions[index-1].Mouse_Y + 30) * scaleFactor);
 
           if(index <= currentMouseData.index) {
             if(drawVecSpeed) {
@@ -207,7 +207,7 @@ function App() {
               }
             }
 
-            context.lineTo(mousePositions[index].Mouse_X * scaleFactor, mousePositions[index].Mouse_Y * scaleFactor);
+            context.lineTo(mousePositions[index].Mouse_X * scaleFactor, (mousePositions[index].Mouse_Y + 30) * scaleFactor);
             context.stroke();
           }
         }
@@ -226,7 +226,7 @@ function App() {
           context.fillStyle = defaultPathColor;
         }
 
-        context.arc(mousePositions[index].Mouse_X * scaleFactor, mousePositions[index].Mouse_Y * scaleFactor, mousePosRadius, 0, 2 * Math.PI, false);
+        context.arc(mousePositions[index].Mouse_X * scaleFactor, (mousePositions[index].Mouse_Y + 30) * scaleFactor, mousePosRadius, 0, 2 * Math.PI, false);
         context.fill();
       }
     }
@@ -236,13 +236,13 @@ function App() {
     if (drawKeyPoints) {
       context.beginPath();
       context.fillStyle = startPointColor;
-      context.arc(mousePositions[0].Mouse_X * scaleFactor, mousePositions[0].Mouse_Y * scaleFactor, mouseKeyPosRadius, 0, 2 * Math.PI, false);
+      context.arc(mousePositions[0].Mouse_X * scaleFactor, (mousePositions[0].Mouse_Y + 30) * scaleFactor, mouseKeyPosRadius, 0, 2 * Math.PI, false);
       context.fill();
 
         if (currentMouseData.index !== 0) {
           context.beginPath();
           context.fillStyle = endPointColor;
-          context.arc(mousePositions[currentMouseData.index].Mouse_X * scaleFactor, mousePositions[currentMouseData.index].Mouse_Y * scaleFactor, mouseKeyPosRadius, 0, 2 * Math.PI, false);
+          context.arc(mousePositions[currentMouseData.index].Mouse_X * scaleFactor, (mousePositions[currentMouseData.index].Mouse_Y + 30) * scaleFactor, mouseKeyPosRadius, 0, 2 * Math.PI, false);
           context.fill();
         }
     }
@@ -526,12 +526,12 @@ function App() {
                   { currentLevel.Score !== "" ? (
                     <>
                       <Typography>Score: {currentLevel.Score}</Typography>
-                      <Typography>AI Nudge(s): {currentLevel.nudge.toString()}</Typography> 
+                      <Typography>AI Suggestion(s): {currentLevel.nudge.toString()}</Typography> 
                     </>
                   ) : (
                     <>
                       <Typography>Score: -</Typography>
-                      <Typography>AI Nudge(s): -</Typography>
+                      <Typography>AI Suggestion(s): -</Typography>
                     </>
                   )}
                 </Stack>
@@ -573,7 +573,7 @@ function App() {
         { currentLevel.Level !== "" ? (
           <Box sx={{position: "relative"}}>
             <Box
-              sx={{height: "100%", width: "100%", position: "relative"}}
+              sx={{height: updatedMazeDimensions.y, width: updatedMazeDimensions.x, position: "relative"}}
               component="img"
               alignItems="center"
               justifyContent="center"
@@ -584,8 +584,8 @@ function App() {
               <>
                 <canvas 
                   id="maze-canvas"
-                  height="1264" 
-                  width="1580" 
+                  height={updatedMazeDimensions.y}
+                  width={updatedMazeDimensions.x} 
                   style={{position: "absolute", left: 0, top: 0}}>
                 </canvas>
                 { drawFogOverlay ? (
@@ -593,7 +593,7 @@ function App() {
                 ):(
                   <Box
                     sx={{height: `${pointerRadius*2}px`, width: `${pointerRadius*2}px`, position: "absolute",
-                    left: `${currentMouseData.position.x*scaleFactor-pointerRadius}px`, top: `${currentMouseData.position.y*scaleFactor-pointerRadius}px`}}
+                    left: `${currentMouseData.position.x*scaleFactor-pointerRadius}px`, top: `${(currentMouseData.position.y + 30)*scaleFactor-pointerRadius}px`}}
                     border="2px solid black"
                     borderRadius="50%"
                   />
