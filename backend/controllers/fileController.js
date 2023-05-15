@@ -52,6 +52,9 @@ function getMouseCSVData(res, participantId, levelId) {
 
         allEntries.every((entry) => {
             if(entry.Level == levelId) {
+                entry.Mouse_X = parseFloat(entry.Mouse_X);
+                entry.Mouse_Y = parseFloat(entry.Mouse_Y);
+
                 currentLevel = true;
                 levelEntries.push(entry);
                 return true;
