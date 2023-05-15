@@ -150,10 +150,9 @@ function App() {
     if (drawFogOverlay) {
       let fogFill = context.createLinearGradient(0, 0, 0, canvas.height);
       fogFill.addColorStop(0,   "transparent");
-      fogFill.addColorStop(.05, "rgba(0, 0, 0, 0.5)");
-      fogFill.addColorStop(.07, "rgba(0, 0, 0, 0.8)");
+      fogFill.addColorStop(.04, "transparent");
+      fogFill.addColorStop(.09, "rgba(0, 0, 0, 0.8)");
       fogFill.addColorStop(.1,  "rgba(0, 0, 0, 1)");
-
 
       let radGrad = context.createRadialGradient(
         currentMouseData.position.x * scaleFactor,
@@ -190,7 +189,7 @@ function App() {
       for (let index = 0; index < mousePositions.length; index++) {
         context.beginPath();
         context.lineWidth = pathThickness;
-
+ 
         if(index === 0) {
           context.moveTo(mousePositions[index].Mouse_X * scaleFactor, (mousePositions[index].Mouse_Y + 30) * scaleFactor);
         } else {
@@ -593,7 +592,7 @@ function App() {
                 ):(
                   <Box
                     sx={{height: `${pointerRadius*2}px`, width: `${pointerRadius*2}px`, position: "absolute",
-                    left: `${currentMouseData.position.x*scaleFactor-pointerRadius}px`, top: `${(currentMouseData.position.y + 30)*scaleFactor-pointerRadius}px`}}
+                    left: `${currentMouseData.position.x * scaleFactor - pointerRadius}px`, top: `${(currentMouseData.position.y + 30) * scaleFactor - pointerRadius}px`}}
                     border="2px solid black"
                     borderRadius="50%"
                   />
