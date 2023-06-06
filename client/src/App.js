@@ -8,14 +8,18 @@ const originalMazeDimensions = {x: 1024, y: 820};
 const updatedMazeDimensions  = {x: 1580, y: 1264};
 const scaleFactor            = updatedMazeDimensions.x / originalMazeDimensions.x;
 
-const pathThickness     = 5;
-const pointerRadius     = 80 * scaleFactor;
-const mousePosRadius    = 5;
-const mouseKeyPosRadius = mousePosRadius * 2;
-const startPointColor   = "#00FF00";
-const endPointColor     = "#FF0000";
-const defaultPathColor  = "#000000";
-const fogPathColor      = "#FFFFFF";
+const pathThickness         = 5;
+
+const originalPointerRadius = 80;
+const pointerRadius         = originalPointerRadius* scaleFactor;
+
+const mousePosRadius        = 5;
+const mouseKeyPosRadius     = mousePosRadius * 2;
+
+const startPointColor  = "#00FF00";
+const endPointColor    = "#FF0000";
+const defaultPathColor = "#000000";
+const fogPathColor     = "#FFFFFF";
 
 
 function App() {
@@ -50,7 +54,7 @@ function App() {
   const [drawKeyPoints,  setDrawKeyPoints]  = useState(false);
   const [drawVecSpeed,   setDrawVecSpeed]   = useState(false);
   const [drawFogOverlay, setDrawFogOverlay] = useState(false);
-  const [sliderValue,   setSliderValue]     = useState(0);
+  const [sliderValue,    setSliderValue]    = useState(0);
 
   const [vecSpeeds, setVecSpeeds] = useState({
     min: -1,
@@ -160,7 +164,7 @@ function App() {
         20 * scaleFactor,
         currentMouseData.position.x * scaleFactor,
         (currentMouseData.position.y + 30)* scaleFactor,
-        80 * scaleFactor
+        pointerRadius
       );
       radGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
       radGrad.addColorStop(0, "rgba(255, 255, 255, 1)");
@@ -174,10 +178,10 @@ function App() {
 
       context.fillStyle = radGrad;
       context.fillRect(
-        (currentMouseData.position.x - 80) * scaleFactor,
-        (currentMouseData.position.y - 80) * scaleFactor,
-        80 * scaleFactor * 2,
-        (80 + 30) * scaleFactor * 2
+        currentMouseData.position.x * scaleFactor - pointerRadius,
+        currentMouseData.position.y * scaleFactor - pointerRadius,
+        pointerRadius * 2,
+        (pointerRadius + 30) * 2
       );
 
       context.globalCompositeOperation = "source-over";
