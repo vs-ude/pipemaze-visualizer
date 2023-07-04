@@ -1,5 +1,5 @@
 # Pipe Maze Visualizer
-This tool was developed for the Paper _Revising Poor Man's Eye Tracker for Crowd-Sourced Studies_ by the [Distributed Systems Group](https://vs.uni-due.de/) of University Duisburg-Essen.
+This tool was developed for the Paper [_Revising Poor Man's Eye Tracker for Crowd-Sourced Studies_](https://doi.org/10.1109/PerComWorkshops56833.2023.10150386) by the [Distributed Systems Group](https://vs.uni-due.de/) of University Duisburg-Essen.
 
 Before the development, an online-based crowd study was carried out in which test persons had to solve a maze.
 Since the use of classic eye-tracking methods (such as the use of infrared hardware) is not possible, the interface for the study participants was adapted in such a way that we were able to implement a "poor man's eye tracker" using only mouse movements.
